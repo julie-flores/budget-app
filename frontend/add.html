@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<script>
+
+const userId = localStorage.getItem("user_id");
+
+if (!userId) {
+  window.location.href = "login.html";
+}
+
+</script>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Add Transaction</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  Budget Tracker
+
+  <nav>
+    <a href="index.html">Dashboard</a>
+    <a href="add.html">Add Transaction</a>
+    <a href="transactions.html">Transactions</a>
+    <a href="recurring.html">Recurring</a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <div class="card">
+
+<h2>Add Transaction</h2>
+
+<form id="transactionForm">
+
+  <label>Amount</label>
+  <input type="number" id="amount" required>
+
+  <label>Type</label>
+  <select id="type">
+    <option value="expense">Expense</option>
+    <option value="income">Income</option>
+  </select>
+
+  <label>Category</label>
+  <select id="category"></select>
+
+  <label>Description</label>
+  <input type="text" id="description">
+
+  <button type="submit">Add Transaction</button>
+
+</form>
+
+  </div>
+
+</div>
+
+<script>
+
+async function loadCategories() {
+
+  const res = await fetch("http://127.0.0.1:5000/categories");
+  const data = await res.json();
+
+  const categorySelect = document.getElementById("category");
+
+  data.forEach(category => {
+
+    const option = document.createElement("option");
+
+    option.value = category.Category_id;
+    option.textContent = category.name;
+
+    categorySelect.appendChild(option);
+  });
+}
+
+document.getElementById("transactionForm")
+.addEventListener("submit", async function(e) {
+
+  e.preventDefault();
+
+  const transaction = {
+  user_id: localStorage.getItem("user_id"),
+  amount: document.getElementById("amount").value,
+  type: document.getElementById("type").value,
+  category_id: document.getElementById("category").value,
+  description: document.getElementById("description").value
+};
+
+  await fetch("http://127.0.0.1:5000/add", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(transaction)
+  });
+
+  alert("Transaction Added!");
+
+  window.location.href = "index.html";
+});
+
+loadCategories();
+
+</script>
+
+</body>
+</html>

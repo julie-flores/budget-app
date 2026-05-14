@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<script>
+
+const userId = localStorage.getItem("user_id");
+
+if (!userId) {
+  window.location.href = "login.html";
+}
+
+</script>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Transactions</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  Budget Tracker
+
+  <nav>
+    <a href="index.html">Dashboard</a>
+    <a href="add.html">Add Transaction</a>
+    <a href="transactions.html">Transactions</a>
+    <a href="recurring.html">Recurring</a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Transactions</h2>
+
+<table>
+
+  <thead>
+    <tr>
+      <th>Amount</th>
+      <th>Type</th>
+      <th>Category</th>
+      <th>Description</th>
+      <th>Date</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <label>Filter:</label>
+
+<select id="filter" onchange="loadTransactions()">
+  <option value="all">All</option>
+  <option value="income">Income</option>
+  <option value="expense">Expense</option>
+</select>
+
+  <tbody id="table-body"></tbody>
+
+</table>
+
+  </div>
+
+</div>
+
+<script>
+
+async function loadTransactions() {
+  const filter = document.getElementById("filter").value;
+
+  const userId = localStorage.getItem("user_id");
+  //console.log("USER ID:", userId);
+  const res = await fetch(
+  `http://127.0.0.1:5000/transactions/${userId}`
+);  
+  const data = await res.json();
+  //console.log(data);
+
+  const table = document.getElementById("table-body");
+  table.innerHTML = "";
+
+  const filteredData = data.filter(t => {
+
+if (filter === "all") {
+return true;
+}
+
+return t.type === filter;
+});
+
+filteredData.forEach(t => {
+
+
+    const row = `
+      <tr>
+        <td>$${t.amount}</td>
+        <td>${t.type}</td>
+        <td>${t.category_name}</td>
+        <td>${t.description}</td>
+        <td>${t.date}</td>
+
+        <td>
+
+          <button onclick="editTransaction(
+            ${t.transaction_id},
+            '${t.amount}',
+            '${t.description}'
+          )">
+            Edit
+          </button>
+
+          <button onclick="deleteTransaction(${t.transaction_id})">
+            Delete
+          </button>
+
+        </td>
+
+      </tr>
+    `;
+
+    table.innerHTML += row;
+
+  });
+}
+
+async function deleteTransaction(id) {
+
+  await fetch(`http://127.0.0.1:5000/delete/${id}`, {
+    method: "DELETE"
+  });
+
+  loadTransactions();
+}
+
+async function editTransaction(id, currentAmount, currentDescription) {
+
+  const newAmount = prompt(
+    "Enter new amount:",
+    currentAmount
+  );
+
+  const newDescription = prompt(
+    "Enter new description:",
+    currentDescription
+  );
+
+  if (!newAmount || !newDescription) {
+    return;
+  }
+
+  await fetch(`http://127.0.0.1:5000/update/${id}`, {
+
+    method: "PUT",
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify({
+      amount: newAmount,
+      description: newDescription
+    })
+
+  });
+
+  loadTransactions();
+}
+
+loadTransactions();
+
+</script>
+</body>
+</html>

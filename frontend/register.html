@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="card">
+
+    <h2>Register</h2>
+
+    <form id="registerForm">
+
+      <label>Email</label>
+      <input type="email" id="email" required>
+
+      <label>Username</label>
+      <input type="text" id="username" required>
+
+      <label>Password</label>
+      <input type="password" id="password" required>
+
+      <button type="submit">Register</button>
+
+    </form>
+
+  </div>
+
+</div>
+
+<script>
+
+document.getElementById("registerForm")
+.addEventListener("submit", async function(e) {
+
+  e.preventDefault();
+
+  const registerData = {
+    email: document.getElementById("email").value,
+    username: document.getElementById("username").value,
+    password: document.getElementById("password").value
+  };
+
+  const res = await fetch("http://127.0.0.1:5000/register", {
+
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify(registerData)
+  });
+
+  const data = await res.json();
+
+  alert(data.message);
+
+  if (res.ok) {
+    window.location.href = "login.html";
+  }
+
+});
+
+</script>
+
+</body>
+</html>
